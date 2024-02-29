@@ -3,7 +3,7 @@ from datetime import datetime
 import pickle
 import re
 
-
+'''testuje czy branch coś zmieni, jak nie to się wkurwie'''
 class Field:
     def __init__(self, value=None):
         self.value = value
