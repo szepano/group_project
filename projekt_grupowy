@@ -1,5 +1,5 @@
 from collections import UserDict
-from datetime import datetime
+from datetime import datetime, timedelta
 import pickle
 import re
 
@@ -143,6 +143,16 @@ class AddressBook(UserDict):
             return str(phone) in [str(phone_obj) for phone_obj in record.phones]
         return False
     
+    def upcoming_birthdays(self, days):
+        upcoming_bdays = []
+        today = datetime.now().date()
+        for record in self.data.values():
+            if record.birthday.value:
+                bday_this_year = datetime(today.year, record.birthday.value.month, record.birthday.value.day).date()
+                if (bday_this_year - today).days <= days:
+                    upcoming_bdays.append(record)
+        return upcoming_bdays
+    
     def __iter__(self):
         self._current = 0
         self._records = list(self.data.values())
@@ -187,6 +197,7 @@ def main():
     - 'remove birthday' - Remove the birthday from an existing entry.
     - 'find' - Search for entries in the address book.
     - 'days to birthday' - Calculate the number of days until the next birthday.
+    - 'upcoming birthdays' - Displays a list of contacts whose birthdays are a specified number of days from the current date;
     - 'show all' - Display all entries in the address book.
     - 'save' - Save the address book to a file.
     - 'load address book' - Load the address book from a file.
@@ -430,6 +441,36 @@ def main():
                     print(f"Error: No birthday found for {name}.\n")
             else:
                 print(f"Error: Name: {name} not found in the address book.\n")
+
+
+        elif command == "upcoming birthdays":
+            try:
+                days = int(input("Enter the number of days to search for upcoming birthdays: "))
+                if days < 0:
+                    print("Error: Please enter a non-negative number of days.\n")
+                    continue
+                today = datetime.now().date()
+                upcoming_bdays = address_book.upcoming_birthdays(days)
+                if days == 0:
+                    upcoming_bdays_today = [record for record in upcoming_bdays if datetime(today.year, record.birthday.value.month, record.birthday.value.day).date() == today]
+                    if upcoming_bdays_today:
+                        print(f"Success: Found contacts with birthdays today:")
+                        for record in upcoming_bdays_today:
+                            print(record)
+                        print('')
+                    else:
+                        print("No upcoming birthdays found for today.\n")
+                else:
+                    upcoming_bdays_future = [record for record in upcoming_bdays if (record.birthday.value.month > today.month) or (record.birthday.value.month == today.month and record.birthday.value.day >= today.day)]
+                    if upcoming_bdays_future:
+                        print(f"Success: Found contacts with upcoming birthdays within {days} days:")
+                        for record in upcoming_bdays_future:
+                            print(record)
+                        print('')
+                    else:
+                        print("No upcoming birthdays found.\n")
+            except ValueError:
+                print("Error: Please enter a valid number of days for upcoming birthdays search.\n")
 
         
         elif command == "show all":
