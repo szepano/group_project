@@ -23,7 +23,7 @@ ARCHIVES_EXTENSIONS = ['ZIP', 'GZ', 'TAR']
 class Field:
     def __init__(self, value=None):
         self.value = value
-
+        
     def __str__(self):
         return str(self.value)
     
@@ -69,8 +69,14 @@ class Email(Field):
                 raise ValueError('dupa')
         else:
             self.value = None
-
-
+class Tag(Field):
+    def __init__(self, value=None):
+        self.value = value
+        
+class Note(Field):
+    def __init__(self, value=None):
+        self.value = value
+           
 class Record:
     def __init__(self, name, birthday=None, address=None, email=None):
         self.name = Name(name)
@@ -126,13 +132,17 @@ class Record:
         return (next_birthday - now).days
 
     def add_note(self, tag, new_note):
-        if not self.note:
-            self.note[tag] = new_note
+        self.note[Tag(tag)] = Note(new_note)
+        
+    def remove_note(self, tag):
+        self.note.pop(tag)
+
+    def edit_note(self, tag, new_note):
+        self.note[Tag(tag)]= Note(new_note)
             
     def __str__(self):
-        return f"Name: {self.name}, Phones: {', '.join(map(str, self.phones))}, Birthday: {self.birthday}, Email: {self.email}, Address: {self.address}"
-
-
+        return f"Name: {self.name}, Phones: {', '.join(map(str, self.phones))}, Birthday: {self.birthday}, Email: {self.email}, Address: {self.address}, Notes: {', '.join(f'({tag}) {note}' for tag, note in self.note.items())}"
+    
 class AddressBook(UserDict):
     def add_record(self, record):
         self.data[record.name.value] = record
@@ -309,8 +319,10 @@ def main():
     - 'remove birthday' - Remove the birthday from an existing entry.
     - 'add email' - Add an email address to en existing entry.
     - 'edit email' - Edit email of an existing entry
-    - 'add note' - add a new note with tag to contact.
-    - 'clean' - sort files in chosen folder by file type.
+    - 'add note' - adds a new note with tag to contact.
+    - 'remove note' - removes a note from contact.
+    - 'edit note' - edits a note in contact.
+    - 'clean' - sorts files in chosen folder by file type.
     - 'find' - Search for entries in the address book.
     - 'days to birthday' - Calculate the number of days until the next birthday.
     - 'upcoming birthdays' - Displays a list of contacts whose birthdays are a specified number of days from the current date;
@@ -323,19 +335,15 @@ def main():
     while True:
         command = input("Enter command: ").lower()
 
-
         if '.' in command:
             break
-
 
         elif command in ['good bye', 'close', 'exit']:
             print("Good bye!")
             break
 
-
         elif command == "hello":
             print("How can I help you?")
-
 
         elif command == "add":
             name = input("Enter name: ")
@@ -379,14 +387,13 @@ def main():
                     print('Invalid email address')
             address_book.add_record(record)
 
-            tag = input("Enter tag: ")    
-            note = input("note: ")
-            record.add_note(tag, note)
-            print(f"Success:  note: ({tag}) {note} has been added successfully. \n")
+            tag = input("Enter tag: ")
+            note = input("Enter note: ")
+            record.add_note(Tag(tag), Note(note))
+            print(f"Success:  note: ({tag}) {note} \n")
+            
 
-
-            print(f"Success: Record: {name}: \n {phone_str}\n Birthday: {birthday_str}\n Email: {record.email}\n Address: {record.address}\n Note: ({tag}) {note} has been added successfully. \n added successfully.")
-                
+            print(f"Success: Record: \n Name: {name} \n Numbers: {phone_str}\n Birthday: {birthday_str}\n Email: {record.email}\n Address: {record.address}\n Note: ({tag}) {note} \nhas been added successfully. \n added successfully.")
 
         elif command == "add phone":
             name = input("Enter name phone: ")
@@ -553,9 +560,50 @@ def main():
             if existing_records:
                 record = existing_records[0]
                 tag = input("Enter tag: ")    
-                note = input("note: ")
-                record.add_note(tag, note)
+                note = input("Enter note: ")
+                record.add_note(Tag(tag), Note(note))
                 print(f"Success:  note: ({tag}) {note} has been added successfully. \n")
+        
+        elif command == "remove note":
+            name = input("Enter name: ")
+            if not name.strip():
+                print("Error: Name cannot be empty. Please enter a valid name.\n")
+                continue
+            existing_records = address_book.find_records(name)
+            if existing_records:
+                record = existing_records[0]
+                if record:
+                    tag = input("Enter tag: ")
+                    record.remove_note(tag)
+                    
+                    print(f"Success:  note in {name} with tag {tag} has been removed successfully. \n")
+                else:
+                    print(f"Error: No note found for {tag}.\n")
+            else:
+                print(f"Error: Name: {name} not found in the address book.\n")
+        
+        elif command == "edit note":
+            name = input("Enter name: ")
+            if not name.strip():
+                print("Error: Name cannot be empty. Please enter a valid name.\n")
+                continue
+            existing_records = address_book.find_records(name)
+            if existing_records:
+                record = existing_records[0]
+                print("Do you wish to also change a tag? \n")
+                valid = input("(y/n): ")
+                if valid == "y":
+                    tag = input("Enter old tag: ")
+                    new_tag = input("Enter new tag: ")
+                    new_note = input("Enter new note: ")
+                    record.remove_note(tag)
+                    record.add_note(Tag(new_tag), Tag(new_note))
+                    
+                elif valid == "n":  
+                    tag = input("Enter tag: ")
+                    new_note = input("Enter note: ")
+                    record.edit_note(Tag(tag), Tag(new_note))
+                    print(f"Success:  note in {name} with tag {tag} has been edited successfully. \n")
                 
         elif command == "clean":
             path = input("Enter Path to folder:")
