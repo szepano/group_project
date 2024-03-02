@@ -54,8 +54,8 @@ class Birthday(Field):
 
 
 class Address(Field):
-    def __init__(self, address=None):
-        self.address = address
+    def __init__(self, value=None):
+        self.value = value
 
 
 class Email(Field):
