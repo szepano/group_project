@@ -23,10 +23,10 @@ ARCHIVES_EXTENSIONS = ['ZIP', 'GZ', 'TAR']
 class Field:
     def __init__(self, value=None):
         self.value = value
-        
+
     def __str__(self):
         return str(self.value)
-    
+
 
 class Name(Field):
     def __init__(self, name):
@@ -41,7 +41,6 @@ class Phone(Field):
         else:
             raise ValueError("Phone number must contain exactly 9 digits.")
         super().__init__(phone)
-
 
 
 class Birthday(Field):
@@ -69,14 +68,18 @@ class Email(Field):
                 raise ValueError('dupa')
         else:
             self.value = None
+
+
 class Tag(Field):
     def __init__(self, value=None):
         self.value = value
-        
+
+
 class Note(Field):
     def __init__(self, value=None):
         self.value = value
-           
+
+
 class Record:
     def __init__(self, name, birthday=None, address=None, email=None):
         self.name = Name(name)
@@ -85,7 +88,7 @@ class Record:
         self.note = {}
         self.address = address
         self.email = email
-        
+
     def add_phone(self, phone):
         self.phones.append(phone)
 
@@ -132,21 +135,26 @@ class Record:
         return (next_birthday - now).days
 
     def add_note(self, tag, new_note):
-        self.note[Tag(tag)] = Note(new_note)
-        
+        self.note[tag] = new_note
+
     def remove_note(self, tag):
-        self.note.pop(tag)
+        if tag in self.note:
+            del self.note[tag]
+            print(f"Success:  note with tag {tag} has been removed successfully. \n")
+
 
     def edit_note(self, tag, new_note):
-        self.note[Tag(tag)]= Note(new_note)
-            
+        if tag in self.note:
+            self.note[tag] = new_note
+
     def __str__(self):
         return f"Name: {self.name}, Phones: {', '.join(map(str, self.phones))}, Birthday: {self.birthday}, Email: {self.email}, Address: {self.address}, Notes: {', '.join(f'({tag}) {note}' for tag, note in self.note.items())}"
-    
+
+
 class AddressBook(UserDict):
     def add_record(self, record):
         self.data[record.name.value] = record
-      
+
     def find_records(self, keyword):
         results = []
         keyword_lower = keyword.lower()
@@ -159,7 +167,7 @@ class AddressBook(UserDict):
                         results.append(record)
                         break  
         return results
-    
+
     def find_partial_records(self, keyword):
         results = []
         keyword_lower = keyword.lower()
@@ -167,14 +175,14 @@ class AddressBook(UserDict):
             if keyword_lower in record.name.value.lower() or any(keyword_lower in str(phone).lower() for phone in record.phones):
                 results.append(record)
         return results
-    
+
     def phone_exists(self, name, phone):
         existing_records = self.find_records(name)
         if existing_records:
             record = existing_records[0]
             return str(phone) in [str(phone_obj) for phone_obj in record.phones]
         return False
-    
+
     def upcoming_birthdays(self, days):
         upcoming_bdays = []
         today = datetime.now().date()
@@ -184,7 +192,7 @@ class AddressBook(UserDict):
                 if (bday_this_year - today).days <= days:
                     upcoming_bdays.append(record)
         return upcoming_bdays
-    
+
     def __iter__(self):
         self._current = 0
         self._records = list(self.data.values())
@@ -196,7 +204,7 @@ class AddressBook(UserDict):
         result = self._records[self._current]
         self._current += 1
         return result
-    
+
     def save_to_file(self, filename):
         with open(filename, "wb") as fh:
             pickle.dump(self, fh)
@@ -212,7 +220,7 @@ class CleanFolder:
         self.path = path
         self.all_existing_extentions = set()
         self.unrecognized_extensions = set()
-    
+
 
 
     def normalize(self, some_string):  
@@ -230,7 +238,7 @@ class CleanFolder:
         normalized_name = self.normalize(Path(file_path).stem)
         move_file = os.path.join(os.path.dirname(file_path), new_folder_name)
         move_to = os.path.join(move_file, f"{normalized_name}.{file_path.split(".")[-1]}")
-        
+
         os.makedirs(move_file, exist_ok= True)
         shutil.move(file_path, move_to)
 
@@ -239,31 +247,31 @@ class CleanFolder:
         extracted_archive = os.path.join(path, arch_name.split('.')[0])
         move_file = os.path.join(os.path.dirname(arch_path), new_folder_name)
         move_to = os.path.join(move_file, arch_name.split('.')[0])
-        
+
         if arch_name.split('.')[-1].upper() == 'ZIP':
             with zipfile.ZipFile(arch_path, 'r') as zip:
                 zip.extractall(extracted_archive)
-                
+
         elif arch_name.split('.')[-1].upper() == 'TAR':
             with tarfile.open(arch_path, 'r') as tar:
                 tar.extractall(extracted_archive)
-                
+
         elif arch_name.split('.')[-1].upper() == 'GZ':
             with gzip.open(arch_path, 'rb') as f_in, open(extracted_archive, 'wb') as f_out:
                 shutil.copyfileobj(f_in, f_out)
-        
+
         os.remove(arch_path)
         os.makedirs(move_file, exist_ok = True)
         shutil.move(extracted_archive, move_to)      
 
     def process_folder(self):
         for root, dirs, files in os.walk(self.path):
-            
+
             for file in files:
                 file_path = os.path.join(root, file)
                 extension = file.split('.')[-1].upper()
-                
-                
+
+
                 if any(folder in root for folder in ["Pictures", "Video", "Documents", "Music", "Aplications", "Unrecognized extensions"]):
                     continue
                 if extension in IMAGE_EXTENSIONS:
@@ -287,7 +295,7 @@ class CleanFolder:
                 else:
                     self.unrecognized_extensions.add(extension)
                     continue
-                    
+
             for dir in dirs:
                 dir_path = os.path.join(root, dir)
                 new_dir_path = os.path.join(root, self.normalize(dir))
@@ -297,8 +305,8 @@ class CleanFolder:
                     os.rename(dir_path ,new_dir_path)
         print(self.all_existing_extentions)
         print(self.unrecognized_extensions)
-    
-    
+
+
 def main():
     """
     The main() function is responsible for managing user interaction with the phone book.
@@ -350,7 +358,7 @@ def main():
             if not name.strip():
                 print("Error: Name cannot be empty.\n")
                 continue
-                        
+
             existing_records = address_book.find_records(name)
             if existing_records:
                 print(f"Error: This name: {name} already exists in the address book. Please choose a different name.\n")
@@ -367,31 +375,30 @@ def main():
                         phone_str = phone
                     except ValueError as e:
                         print(f"Incorrect phone number: {e}")
-                
-            birthday = input("Enter birthday (dd-mm-yyyy): ")
-            birthday_str = ''
-            if birthday.strip():
-                try:
-                    record.add_birthday(birthday)
-                    birthday_str = birthday
-                except ValueError as e:
-                    print(f"Incorrect birthday format: {e}")
 
-            email = input("If you don't want to add email address just press enter. \nEnter email (example@dummy.com):")
-            email_str = ''
-            if email.strip():
-                try:
-                    record.add_email(email)
-                    email_str = email
-                except ValueError:
-                    print('Invalid email address')
-            address_book.add_record(record)
+                birthday = input("Enter birthday (dd-mm-yyyy): ")
+                birthday_str = ''
+                if birthday.strip():
+                    try:
+                        record.add_birthday(birthday)
+                        birthday_str = birthday
+                    except ValueError as e:
+                        print(f"Incorrect birthday format: {e}")
 
-            tag = input("Enter tag: ")
-            note = input("Enter note: ")
-            record.add_note(Tag(tag), Note(note))
-            print(f"Success:  note: ({tag}) {note} \n")
-            
+                email = input("If you don't want to add email address just press enter. \nEnter email (example@dummy.com):")
+                email_str = ''
+                if email.strip():
+                    try:
+                        record.add_email(email)
+                        email_str = email
+                    except ValueError:
+                        print('Invalid email address')
+                address_book.add_record(record)
+
+                tag = input("Enter tag: ")
+                note = input("Enter note: ")
+                record.add_note(tag, note)
+
 
             print(f"Success: Record: \n Name: {name} \n Numbers: {phone_str}\n Birthday: {birthday_str}\n Email: {record.email}\n Address: {record.address}\n Note: ({tag}) {note} \nhas been added successfully. \n added successfully.")
 
@@ -400,7 +407,7 @@ def main():
             if not name.strip():
                 print("Error: Name cannot be empty. Please enter a valid name.\n")
                 continue
-            
+
             existing_records = address_book.find_records(name)
             if not existing_records:
                 print(f"Error: This name: {name} does not exist in the address book. Please add a new record first.\n")
@@ -488,7 +495,7 @@ def main():
                 new_email = Email(email)
                 record.add_email(str(new_email))
                 print('done', record.email)
-            
+
         elif command == "find":
             search_char = input("Enter the character by which you want to search for users: ").strip().lower()
             if not search_char:
@@ -506,7 +513,7 @@ def main():
                         input("Press enter to see the next page...\n")
             else:
                 print("Error: No matching records found.")
-        
+
 
         elif command == "add birthday":
             name = input("Enter name: ")
@@ -555,56 +562,59 @@ def main():
             name = input("Enter name: ")
             if not name.strip():
                 print("Error: Name cannot be empty. Please enter a valid name.\n")
-                continue
-            existing_records = address_book.find_records(name)
-            if existing_records:
-                record = existing_records[0]
-                tag = input("Enter tag: ")    
-                note = input("Enter note: ")
-                record.add_note(Tag(tag), Note(note))
-                print(f"Success:  note: ({tag}) {note} has been added successfully. \n")
-        
+
+            else:
+                records = address_book.find_records(name)
+                if records:
+                    record = records[0]
+                    tag = input("Enter tag: ")    
+                    note = input("Enter note: ")
+                    record.add_note(tag, note)
+                    print(f"Success:  note: ({tag}) {note} has been added successfully. \n")
+                else:
+                    print(f"Error: Name: {name} not found in the address book.\n")
+
         elif command == "remove note":
             name = input("Enter name: ")
             if not name.strip():
-                print("Error: Name cannot be empty. Please enter a valid name.\n")
-                continue
-            existing_records = address_book.find_records(name)
-            if existing_records:
-                record = existing_records[0]
-                if record:
+                print("Error: Name cannot be empty. Please enter a valid name.\n")   
+            else:
+                records = address_book.find_records(name)
+                if records:
+                    record = records[0]
                     tag = input("Enter tag: ")
                     record.remove_note(tag)
-                    
-                    print(f"Success:  note in {name} with tag {tag} has been removed successfully. \n")
                 else:
-                    print(f"Error: No note found for {tag}.\n")
-            else:
-                print(f"Error: Name: {name} not found in the address book.\n")
-        
+                    print(f"Error: No record found for {name}.\n")
+
         elif command == "edit note":
             name = input("Enter name: ")
             if not name.strip():
                 print("Error: Name cannot be empty. Please enter a valid name.\n")
                 continue
-            existing_records = address_book.find_records(name)
-            if existing_records:
-                record = existing_records[0]
-                print("Do you wish to also change a tag? \n")
-                valid = input("(y/n): ")
-                if valid == "y":
-                    tag = input("Enter old tag: ")
-                    new_tag = input("Enter new tag: ")
-                    new_note = input("Enter new note: ")
-                    record.remove_note(tag)
-                    record.add_note(Tag(new_tag), Tag(new_note))
-                    
-                elif valid == "n":  
-                    tag = input("Enter tag: ")
-                    new_note = input("Enter note: ")
-                    record.edit_note(Tag(tag), Tag(new_note))
-                    print(f"Success:  note in {name} with tag {tag} has been edited successfully. \n")
-                
+
+            else:
+                records = address_book.find_records(name)
+                if records:
+                    record = records[0]
+                    if record:
+                        print("Do you wish to also change a tag? \n")
+                        valid = input("(y/n): ")
+                        if valid == "y":
+                            tag = input("Enter old tag: ")
+                            new_tag = input("Enter new tag: ")
+                            new_note = input("Enter new note: ")
+                            record.remove_note(tag)
+                            record.add_note(new_tag, new_note)
+
+                        elif valid == "n":  
+                            tag = input("Enter tag: ")
+                            new_note = input("Enter note: ")
+                            record.edit_note(tag, new_note)
+                            print(f"Success:  note in {name} with tag {tag} has been edited successfully. \n")
+                    else:
+                        print(f"Error: Name: {name} not found in the address book.\n")
+
         elif command == "clean":
             path = input("Enter Path to folder:")
             cleanfolder = CleanFolder(path)
@@ -660,7 +670,7 @@ def main():
             except ValueError:
                 print("Error: Please enter a valid number of days for upcoming birthdays search.\n")
 
-        
+
         elif command == "show all":
             if address_book:
                 print("Success: All Contacts:")
@@ -680,7 +690,7 @@ def main():
             filename = input("Enter the filename to save the address book: ")
             address_book.save_to_file(filename)
             print(f"Success: Address book saved to {filename}.\n")
-        
+
 
         elif command == "load address book":
             filename = input("Enter the filename to load the address book from: ")
