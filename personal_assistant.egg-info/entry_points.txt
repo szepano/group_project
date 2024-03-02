@@ -1,2 +1,2 @@
 [console_scripts]
-assistant = group_project.project_grupowy:main
+assistant = group_project.personal_assistant:main
