@@ -220,6 +220,15 @@ class AddressBook(UserDict):
             content = pickle.load(fh)
         return content
 
+    def search_and_sort_notes_by_tag(self, tag):
+        records_with_tag = []
+        for record in self.data.values():
+            if tag in record.note:
+                records_with_tag.append(record)
+
+        records_with_tag.sort(key=lambda x: x.note[tag])
+        return records_with_tag
+
 
 class CleanFolder:
     def __init__(self, path):
@@ -343,6 +352,7 @@ def main():
     - 'show all' - Display all entries in the address book.
     - 'save' - Save the address book to a file.
     - 'load address book' - Load the address book from a file.
+    - 'search and sort notes' - Search and sort notes by a specific tag.
     """
     address_book = AddressBook()
 
@@ -579,6 +589,17 @@ def main():
                     print(f"Success:  note: ({tag}) {note} has been added successfully. \n")
                 else:
                     print(f"Error: Name: {name} not found in the address book.\n")
+        
+        elif command == "search and sort notes":
+            tag = input("Enter the tag to search and sort by: ")
+            tagged_records = address_book.search_and_sort_notes_by_tag(tag)
+            if tagged_records:
+                print(f"Success: Records with tag '{tag}':")
+                for record in tagged_records:
+                    print(record)
+                print('')
+            else:
+                print(f"No records found with tag '{tag}'.\n")            
 
         elif command == "remove note":
             name = input("Enter name: ")
@@ -709,7 +730,6 @@ def main():
 
         else:
             print("Error: Invalid command. Enter the correct command.\n")
-
 
 if __name__ == "__main__":
     main()
