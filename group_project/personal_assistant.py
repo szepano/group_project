@@ -258,7 +258,7 @@ class CleanFolder:
     def move_and_normalize_files(self, file_path, new_folder_name):
         normalized_name = self.normalize(Path(file_path).stem)
         move_file = os.path.join(os.path.dirname(file_path), new_folder_name)
-        move_to = os.path.join(move_file, f"{normalized_name}.{file_path.split(".")[-1]}")
+        move_to = os.path.join(move_file, f"{normalized_name}.{file_path.split('.')[-1]}")
 
         os.makedirs(move_file, exist_ok= True)
         shutil.move(file_path, move_to)
