@@ -206,11 +206,17 @@ class AddressBook(UserDict):
         return result
 
     def save_to_file(self, filename):
-        with open(filename, "wb") as fh:
+        home_folder = os.path.expanduser("~")
+        file_path = os.path.join(home_folder, filename)
+        
+        with open(file_path, 'wb') as fh:
             pickle.dump(self, fh)
 
     def load_from_file(filename):
-        with open(filename, "rb") as fh:
+        home_folder = os.path.expanduser("~")
+        file_path = os.path.join(home_folder, filename)
+        
+        with open(file_path, 'rb') as fh:
             content = pickle.load(fh)
         return content
 
