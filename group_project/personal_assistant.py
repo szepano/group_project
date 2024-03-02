@@ -114,6 +114,12 @@ class Record:
     def add_address(self, address):
         self.address = Address(address)
 
+    def edit_address(self, new_address):
+        self.address = Address(new_address)
+
+    def remove_address(self):
+        self.address = Address()
+
     def add_email(self, email):
         while True:  # Pętla będzie kontynuowana dopóki nie zostanie wprowadzony poprawny email
             try:
@@ -338,6 +344,9 @@ def main():
     - 'add phone' - Add a new phone number to an existing entry.
     - 'edit phone' - Edit an existing phone number.
     - 'remove phone' - Remove a phone number from an existing entry.
+    - 'add address' - Adding address to an existing entry.
+    - 'edit address' - Editing address of an existing entry.
+    - 'remove address' - Removing address of an existing entry.
     - 'add birthday' - Add a birthday to an existing entry.
     - 'remove birthday' - Remove the birthday from an existing entry.
     - 'add email' - Add an email address to en existing entry.
@@ -458,7 +467,7 @@ def main():
                     record.add_email(new_email)
 
         elif command == 'add address':
-            name = input('Enter address name')
+            name = input('Enter name: ')
             if not name.strip():
                 print("Error: Name cannot be empty. Please enter a valid name.\n")
                 continue
@@ -467,9 +476,39 @@ def main():
                 print(f"Error: This name: {name} does not exist in the address book. Please add a new record first.\n")
             else:
                 record = existing_records[0]
-                address = input('Enter address')
+                address = input('Enter address: ')
                 new_address = Address(address)
                 record.add_address(new_address)
+                print(f"Address added successfully to {name}.\n")
+
+        elif command == "edit address":
+            name = input("Enter name to edit address: ")
+            if not name.strip():
+                print("Error: Name cannot be empty. Please enter a valid name.\n")
+                continue
+            existing_records = address_book.find_records(name)
+            if existing_records:
+                record = existing_records[0]
+                new_address = input("Enter new address: ")
+                record.edit_address(new_address)
+                print(f"Success: Address updated successfully for {name}.\n")
+            else:
+                print(f"Error: Name: {name} not found in the address book.\n")
+
+        elif command == "remove address":
+            name = input("Enter name to remove address: ")
+            if not name.strip():
+                print("Error: Name cannot be empty. Please enter a valid name.\n")
+                continue
+            existing_records = address_book.find_records(name)
+            if existing_records:
+                record = existing_records[0]
+                record.remove_address()
+                print(f"Success: Address removed successfully for {name}.\n")
+            else:
+                print(f"Error: Name: {name} not found in the address book.\n")
+
+
         elif command == "edit phone":
             name = input("Enter name to edit phone number: ")
             if not name.strip():
