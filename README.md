@@ -20,21 +20,23 @@ Commands:
 - 'good bye', 'close', 'exit' - Terminate the program with the message "Good bye!".
 - 'hello' - Display a greeting.
 - 'add' - Add a new entry to the address book.
+- 'remove' - Removes contact from address book.
 - 'add phone' - Add a new phone number to an existing entry.
-- 'edit phone' - Edit an existing phone number.
 - 'remove phone' - Remove a phone number from an existing entry.
+- 'edit phone' - Edit an phone number of an existing entry.
 - 'add birthday' - Add a birthday to an existing entry.
 - 'remove birthday' - Remove the birthday from an existing entry.
+- 'edit birthday' - Edit birthday of an existing entry.
 - 'add email' - Add an email address to en existing entry.
-- 'edit email' - Edit email of an existing entry
-- 'add note' - adds a new note with tag to contact.
-- 'remove note' - removes a note from contact.
-- 'edit note' - edits a note in contact.
+- 'remove email' - Remove email of an existing entry.
+- 'edit email' - Edit email of an existing entry.
+- 'add note' - adds a new note with tag to existing entry.
+- 'remove note' - removes a note from existing entry.
+- 'edit note' - edits a note of existing entry.
 - 'clean' - sorts files in chosen folder by file type.
 - 'find' - Search for entries in the address book.
 - 'days to birthday' - Calculate the number of days until the next birthday.
-- 'upcoming birthdays' - Displays a list of contacts whose birthdays are a specified number of days from the current date;
+- 'upcoming birthdays' - Displays a list of contacts whose birthdays are a specified number of days from the current date.
 - 'show all' - Display all entries in the address book.
 - 'save' - Save the address book to a file.
 - 'load address book' - Load the address book from a file.
-
