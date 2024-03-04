@@ -1,3 +1,5 @@
+LICENSE
+README.md
 setup.py
 group_project/__init__.py
 group_project/personal_assistant.py
