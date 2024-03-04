@@ -161,6 +161,9 @@ class AddressBook(UserDict):
     def add_record(self, record):
         self.data[record.name.value] = record
 
+    def remove_contact(self, record):
+        self.data.pop(record.name.value)
+        
     def find_records(self, keyword):
         results = []
         keyword_lower = keyword.lower()
@@ -258,7 +261,7 @@ class CleanFolder:
     def move_and_normalize_files(self, file_path, new_folder_name):
         normalized_name = self.normalize(Path(file_path).stem)
         move_file = os.path.join(os.path.dirname(file_path), new_folder_name)
-        move_to = os.path.join(move_file, f"{normalized_name}.{file_path.split(".")[-1]}")
+        move_to = os.path.join(move_file, f"{normalized_name}.{file_path.split('.')[-1]}")
 
         os.makedirs(move_file, exist_ok= True)
         shutil.move(file_path, move_to)
@@ -341,6 +344,7 @@ def main():
     - 'good bye', 'close', 'exit' - Terminate the program with the message "Good bye!".
     - 'hello' - Display a greeting.
     - 'add' - Add a new entry to the address book.
+    - 'remove contact' - Removes whole existing record in address book.
     - 'add phone' - Add a new phone number to an existing entry.
     - 'edit phone' - Edit an existing phone number.
     - 'remove phone' - Remove a phone number from an existing entry.
@@ -348,6 +352,7 @@ def main():
     - 'edit address' - Editing address of an existing entry.
     - 'remove address' - Removing address of an existing entry.
     - 'add birthday' - Add a birthday to an existing entry.
+    - 'edit birthday' - Changes EXISTING birthday in entry.
     - 'remove birthday' - Remove the birthday from an existing entry.
     - 'add email' - Add an email address to en existing entry.
     - 'edit email' - Edit email of an existing entry
@@ -551,6 +556,14 @@ def main():
                 record.add_email(str(new_email))
                 print('done', record.email)
 
+        elif command == 'remove contact':
+            name = input('Enter name of contact you want to remove: ')
+            results = address_book.find_records(name)
+            if len(results) == 0:
+                print('Contact not found. Please try again.\n')
+            address_book.remove_contact(results[0])
+            
+
         elif command == "find":
             search_char = input("Enter the character by which you want to search for users: ").strip().lower()
             if not search_char:
@@ -591,6 +604,30 @@ def main():
                         print("Error: No birthday was provided. No new birthday added.\n")
                 else:
                     print(f"Error: A birthday is already assigned to {name}. Cannot add more than one birthday.\n")
+            else:
+                print(f"Error: Name: {name} not found in the address book.\n")
+
+        elif command == "edit birthday":
+            name = input("Enter name: ")
+            if not name.strip():
+                print("Error: Name cannot be empty. Please enter a valid name.\n")
+                continue
+
+            existing_records = address_book.find_records(name)
+            if existing_records:
+                record = existing_records[0]
+                if record.birthday.value is not None:
+                    birthday = input("Enter birthday (dd-mm-yyyy): ")
+                    if birthday.strip():
+                        try:
+                            record.add_birthday(birthday)
+                            print(f"Success: Birthday: {birthday} changed successfully to {name}.\n")
+                        except ValueError as e:
+                            print(f"Incorrect birthday format: {e}")
+                    else:
+                        print("Error: No birthday was provided. Birthday not changed.\n")
+                else:
+                    print(f"Error: No birthday assigned to {name}. Use command 'add birthday'\n")
             else:
                 print(f"Error: Name: {name} not found in the address book.\n")
 
