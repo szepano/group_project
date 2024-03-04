@@ -20,7 +20,7 @@ Commands:
 - 'good bye', 'close', 'exit' - Terminate the program with the message "Good bye!".
 - 'hello' - Display a greeting.
 - 'add' - Add a new entry to the address book.
-- 'remove' - Removes contact from address book.
+- 'remove contact' - Removes contact from address book.
 - 'add phone' - Add a new phone number to an existing entry.
 - 'remove phone' - Remove a phone number from an existing entry.
 - 'edit phone' - Edit an phone number of an existing entry.
